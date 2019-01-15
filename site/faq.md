@@ -432,7 +432,7 @@ kinds; putting the annotation in the file always works.
 
 ### Can I disable Flux registry scanning?
 
-You can exclude images from being scanned by provide a list of glob expressions using the `registry-exclude-image` flag.
+You can exclude images from being scanned by provide a list of glob expressions using the `registry-exclude-image` [flag](daemon.md#flags).
 
 Exclude images from Docker Hub and Quay.io:
 
@@ -449,7 +449,7 @@ Exclude images containing `test` in the FQN:
 Disable image scanning for all images:
 
 ```
---registry-exclude-image=*test*
+--registry-exclude-image=*
 ```
 
 ## Flux Helm Operator questions
