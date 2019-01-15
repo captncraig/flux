@@ -1,6 +1,13 @@
 This is the changelog for the Flux daemon; the changelog for the Helm
 operator is in [./CHANGELOG-helmop.md](./CHANGELOG-helmop.md).
 
+## 1.9.1 (TBA)
+
+### Improvements
+
+- Allow images to be excluded from scanning based on glob expression list
+  [weaveworks/flux#1659][#1659]
+
 ## 1.9.0 (2019-01-09)
 
 This release adds native support for ECR (Amazon Elastic Container
