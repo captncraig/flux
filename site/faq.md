@@ -457,11 +457,12 @@ Disable image scanning for all images:
 ### I'm using SSL between Helm and Tiller. How can I configure Flux to use the certificate?
 
 When installing Flux, you can supply the CA and client-side certificate using the `helmOperator.tls` options,
-more details [here](https://github.com/weaveworks/flux/blob/master/chart/flux/README.md#installing-weave-flux-helm-operator-and-helm-with-tls-enabled).
+more details [here](helm-operator.md).
 
 ### I've deleted a HelmRelease file from Git. Why is the Helm release still running on my cluster?
 
-Flux doesn't delete resources, there is an [issue](https://github.com/weaveworks/flux/issues/738) opened about this topic on GitHub.
+Flux doesn't delete resources, there is an [issue](https://github.com/weaveworks/flux/issues/738) 
+opened about this topic on GitHub.
 In order to delete a Helm release first remove the file from Git and afterwards run:
 
 ```yaml
@@ -477,7 +478,14 @@ You need to use the `helm delete --purge` option only then Flux will be able rei
 
 ### I have a dedicated Kubernetes cluster per environment and I want to use the same Git repo for all. How can I do that?
 
-For each cluster create a Git branch in your config repo. When installing Flux set the Git branch using `--set git.branch=cluster-name`
+*Option 1*
+For each cluster create a directory in your config repo.
+When installing Flux Helm chart set the Git path using `--set git.path=k8s/cluster1`
+and set a unique label for each cluster `--set git.label=cluster1`.
+
+*Option 2*
+For each cluster create a Git branch in your config repo. 
+When installing Flux Helm chart set the Git branch using `--set git.branch=cluster-name`
 and set a unique label for each cluster `--set git.label=cluster-name`.
 
 
