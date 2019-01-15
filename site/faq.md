@@ -29,11 +29,11 @@ menu_order: 60
   * [Can I restrict the namespaces that Flux can see or operate on?](#can-i-restrict-the-namespaces-that-flux-can-see-or-operate-on)
   * [Can I change the namespace Flux puts things in by default?](#can-i-change-the-namespace-flux-puts-things-in-by-default)
   * [Can I temporarily make Flux ignore a deployment?](#can-i-temporarily-make-flux-ignore-a-deployment)
+  * [Can I disable Flux registry scanning?](#can-i-disable-flux-registry-scanning)
 - [Flux Helm Operator questions](#flux-helm-operator-questions)
   * [I'm using SSL between Helm and Tiller. How can I configure Flux to use the certificate?](#im-using-ssl-between-helm-and-tiller-how-can-i-configure-flux-to-use-the-certificate)
-  * [I've deleted a FluxHelmRelease file from Git. Why is the Helm release still running on my cluster?](#ive-deleted-a-fluxhelmrelease-file-from-git-why-is-the-helm-release-still-running-on-my-cluster)
+  * [I've deleted a HelmRelease file from Git. Why is the Helm release still running on my cluster?](#ive-deleted-a-helmrelease-file-from-git-why-is-the-helm-release-still-running-on-my-cluster)
   * [I've manually deleted a Helm release. Why is Flux not able to restore it?](#ive-manually-deleted-a-helm-release-why-is-flux-not-able-to-restore-it)
-  * [I've uninstalled Flux and all my Helm releases are gone. Why is that?](#ive-uninstalled-flux-and-all-my-helm-releases-are-gone-why-is-that)
   * [I have a dedicated Kubernetes cluster per environment and I want to use the same Git repo for all. How can I do that?](#i-have-a-dedicated-kubernetes-cluster-per-environment-and-i-want-to-use-the-same-git-repo-for-all-how-can-i-do-that)
 
 ## General questions
@@ -430,6 +430,28 @@ only returns the kinds of resource mentioned above. So,
 annotating a running resource only works if it's one of those
 kinds; putting the annotation in the file always works.
 
+### Can I disable Flux registry scanning?
+
+You can exclude images from being scanned by provide a list of glob expressions using the `registry-exclude-image` flag.
+
+Exclude images from Docker Hub and Quay.io:
+
+```
+--registry-exclude-image=docker.io/*,quay.io/*
+```
+
+Exclude images containing `test` in the FQN:
+
+```
+--registry-exclude-image=*test*
+```
+
+Disable image scanning for all images:
+
+```
+--registry-exclude-image=*test*
+```
+
 ## Flux Helm Operator questions
 
 ### I'm using SSL between Helm and Tiller. How can I configure Flux to use the certificate?
@@ -437,7 +459,7 @@ kinds; putting the annotation in the file always works.
 When installing Flux, you can supply the CA and client-side certificate using the `helmOperator.tls` options,
 more details [here](https://github.com/weaveworks/flux/blob/master/chart/flux/README.md#installing-weave-flux-helm-operator-and-helm-with-tls-enabled).
 
-### I've deleted a FluxHelmRelease file from Git. Why is the Helm release still running on my cluster?
+### I've deleted a HelmRelease file from Git. Why is the Helm release still running on my cluster?
 
 Flux doesn't delete resources, there is an [issue](https://github.com/weaveworks/flux/issues/738) opened about this topic on GitHub.
 In order to delete a Helm release first remove the file from Git and afterwards run:
@@ -452,11 +474,6 @@ The Flux Helm operator will receive the delete event and will purge the Helm rel
 
 If you delete a Helm release with `helm delete my-release`, the release name can't be reused.
 You need to use the `helm delete --purge` option only then Flux will be able reinstall a release.
-
-### I've uninstalled Flux and all my Helm releases are gone. Why is that?
-
-On `HelmRelease` CRD deletion, Kubernetes will remove all `HelmRelease` resources triggering a Helm purge for each release created by Flux.
-To avoid this you have to manually delete the Flux Helm Operator with `kubectl -n flux delete deployment/flux-helm-operator` before running `helm delete flux`.
 
 ### I have a dedicated Kubernetes cluster per environment and I want to use the same Git repo for all. How can I do that?
 
