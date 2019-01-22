@@ -10,7 +10,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/go-kit/kit/log"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/helm/pkg/chartutil"
 	k8shelm "k8s.io/helm/pkg/helm"
@@ -144,18 +144,9 @@ func (r *Release) Install(chartPath, releaseName string, fhr flux_v1beta1.HelmRe
 	// Read values from given valueFile paths (configmaps, etc.)
 	mergedValues := chartutil.Values{}
 	for _, valueFileSecret := range fhr.Spec.ValueFileSecrets {
-		// Read the contents of the secret
-		secret, err := kubeClient.CoreV1().Secrets(fhr.Namespace).Get(valueFileSecret.Name, v1.GetOptions{})
-		if err != nil {
-			r.logger.Log("error", fmt.Sprintf("Cannot get secret %s for Chart release [%s]: %#v", valueFileSecret.Name, releaseName, err))
-			return nil, err
-		}
 
-		// Load values.yaml file and merge
-		var values chartutil.Values
-		err = yaml.Unmarshal(secret.Data["values.yaml"], &values)
+		values, err := r.getValuesFromSecret(fhr.Namespace, valueFileSecret.Name, releaseName, kubeClient)
 		if err != nil {
-			r.logger.Log("error", fmt.Sprintf("Cannot yaml.Unmashal values.yaml in secret %s for Chart release [%s]: %#v", valueFileSecret.Name, releaseName, err))
 			return nil, err
 		}
 		mergedValues = mergeValues(mergedValues, values)
@@ -267,6 +258,24 @@ func (r *Release) annotateResources(release *hapi_release.Release, fhr flux_v1be
 // fhrResourceID constructs a flux.ResourceID for a HelmRelease resource.
 func fhrResourceID(fhr flux_v1beta1.HelmRelease) flux.ResourceID {
 	return flux.MakeResourceID(fhr.Namespace, "HelmRelease", fhr.Name)
+}
+
+func (r *Release) getValuesFromSecret(namespace string, name string, releaseName string, kubeClient *kubernetes.Clientset) (chartutil.Values, error) {
+	// Read the contents of the secret
+	secret, err := kubeClient.CoreV1().Secrets(namespace).Get(name, v1.GetOptions{})
+	if err != nil {
+		r.logger.Log("error", fmt.Sprintf("Cannot get secret %s for Chart release [%s]: %#v", name, releaseName, err))
+		return nil, err
+	}
+
+	// Load values.yaml file and merge
+	var values chartutil.Values
+	err = yaml.Unmarshal(secret.Data["values.yaml"], &values)
+	if err != nil {
+		r.logger.Log("error", fmt.Sprintf("Cannot yaml.Unmashal values.yaml in secret %s for Chart release [%s]: %#v", name, releaseName, err))
+		return nil, err
+	}
+	return values, nil
 }
 
 // Merges source and destination `chartutils.Values`, preferring values from the source Values
