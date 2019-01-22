@@ -48,7 +48,7 @@ import (
 	google_protobuf "github.com/golang/protobuf/ptypes/any"
 	"github.com/google/go-cmp/cmp"
 	"github.com/ncabatoff/go-seq/seq"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -89,6 +89,9 @@ type Config struct {
 	LogDiffs   bool
 	UpdateDeps bool
 	GitTimeout time.Duration
+
+	GlobalValueSecrets []string
+	OperatorNamespace  string
 }
 
 func (c Config) WithDefaults() Config {
